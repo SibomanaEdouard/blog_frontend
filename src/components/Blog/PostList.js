@@ -12,9 +12,7 @@ const PostList = ({ posts }) => {
     const [editPostId, setEditPostId] = useState(null);
     const [editPostContent, setEditPostContent] = useState('');
     const [postList, setPostList] = useState(posts);
-    const [addingComment, setAddingComment] = useState(false);
 
-    // Function to handle expanding or collapsing post comments
     const handleExpand = useCallback(async (postId) => {
         if (expandedPostId === postId) {
             setExpandedPostId(null);
@@ -33,13 +31,8 @@ const PostList = ({ posts }) => {
         }
     }, [expandedPostId]);
 
-    // Function to handle adding a new comment
     const handleAddComment = async (postId) => {
-        if (!currentUser) return; // Ensure user is logged in
-        if (!newComment.trim()) return; // Prevent adding empty comments
-
-        setAddingComment(true); // Show loading state
-
+        if (!currentUser) return;
         try {
             const response = await axiosInstance.post(`/comment/${postId}`, { content: newComment });
             setComments(prevComments => ({
@@ -47,14 +40,11 @@ const PostList = ({ posts }) => {
                 [postId]: [...(prevComments[postId] || []), response.data.data]
             }));
             setNewComment('');
-            setAddingComment(false); // Hide loading state
         } catch (error) {
             console.error('Error adding comment:', error);
-            setAddingComment(false); // Hide loading state
         }
     };
 
-    // Function to handle editing an existing comment
     const handleEditComment = async (postId, commentId) => {
         try {
             const response = await axiosInstance.put(`/comment/${commentId}`, { content: editCommentContent });
@@ -71,7 +61,6 @@ const PostList = ({ posts }) => {
         }
     };
 
-    // Function to handle editing a post
     const handleEditPost = async (postId) => {
         try {
             const response = await axiosInstance.put(`/posts/${postId}`, { content: editPostContent });
@@ -85,7 +74,6 @@ const PostList = ({ posts }) => {
         }
     };
 
-    // Function to handle deleting a comment
     const handleDeleteComment = async (postId, commentId) => {
         try {
             await axiosInstance.delete(`/comment/${commentId}`);
@@ -98,7 +86,6 @@ const PostList = ({ posts }) => {
         }
     };
 
-    // Function to handle deleting a post
     const handleDeletePost = async (postId) => {
         try {
             await axiosInstance.delete(`/posts/${postId}`);
@@ -116,7 +103,6 @@ const PostList = ({ posts }) => {
                         key={post.id}
                         className={`bg-white border rounded-lg shadow-lg p-4 transition-transform duration-300 ease-in-out transform ${expandedPostId === post.id ? 'border-blue-500 scale-105' : 'border-gray-200'}`}
                     >
-                        {/* Post Editing */}
                         {editPostId === post.id ? (
                             <>
                                 <textarea
@@ -145,7 +131,6 @@ const PostList = ({ posts }) => {
                                     {post.content.length > 100 && '...'}
                                 </p>
                                 <p className="text-gray-600 mt-2">By {post.username}</p>
-                                {/* Post Actions for the Author */}
                                 {currentUser && currentUser.id === post.authorId && (
                                     <>
                                         <button
@@ -168,7 +153,6 @@ const PostList = ({ posts }) => {
                             </>
                         )}
 
-                        {/* Toggle Comments Visibility */}
                         <button
                             onClick={() => handleExpand(post.id)}
                             className={`mt-4 px-4 py-2 rounded font-semibold ${expandedPostId === post.id ? 'bg-red-500' : 'bg-blue-500'} text-white transition-colors duration-300`}
@@ -176,7 +160,6 @@ const PostList = ({ posts }) => {
                             {expandedPostId === post.id ? 'HIDE COMMENTS' : 'SHOW COMMENTS'}
                         </button>
 
-                        {/* Comments Section */}
                         {expandedPostId === post.id && (
                             <div className="mt-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <h4 className="text-lg font-semibold text-gray-800">Comments:</h4>
@@ -186,7 +169,6 @@ const PostList = ({ posts }) => {
                                     ) : (
                                         (comments[post.id] || []).map(comment => (
                                             <div key={comment.id} className="border-t pt-2 border-gray-200">
-                                                {/* Comment Editing */}
                                                 {editCommentId === comment.id ? (
                                                     <>
                                                         <textarea
@@ -211,7 +193,6 @@ const PostList = ({ posts }) => {
                                                     <>
                                                         <p className="text-gray-800">{comment.content}</p>
                                                         <p className="text-gray-600 text-sm mt-1">BY: {comment.username}</p>
-                                                        {/* Comment Actions for the Author */}
                                                         {currentUser && currentUser.id === comment.authorId && (
                                                             <>
                                                                 <button
@@ -237,7 +218,6 @@ const PostList = ({ posts }) => {
                                         ))
                                     )}
                                 </div>
-                                {/* Add Comment Form */}
                                 {currentUser && (
                                     <>
                                         <input
@@ -249,10 +229,9 @@ const PostList = ({ posts }) => {
                                         />
                                         <button
                                             onClick={() => handleAddComment(post.id)}
-                                            disabled={addingComment}
-                                            className={`mt-2 px-4 py-2 rounded font-semibold ${addingComment ? 'bg-gray-400' : 'bg-blue-500'} text-white transition-colors duration-300`}
+                                            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
                                         >
-                                            {addingComment ? 'Adding...' : 'Add Comment'}
+                                            Add Comment
                                         </button>
                                     </>
                                 )}
